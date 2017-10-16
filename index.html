@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>web rtc 测试</title>
+</head>
+
+<body>
+
+
+    <button id="setup-new-room">启动新会话</button>
+
+    <!-- 加入房间列表 -->
+    <table style="width: 100%;" id="rooms-list"></table>
+
+    <!-- 视频容器 -->
+    <div id="videos-container"></div>
+
+    <script src="https://cdn.webrtc-experiment.com/socket.io.js">
+    </script>
+    <!-- <script src="https://cdn.webrtc-experiment.com/RTCPeerConnection-v1.5.js">
+    </script> -->
+    <script src="./RTCPeerConnection-v1.5.js">
+    </script>
+    <script src="https://cdn.webrtc-experiment.com/video-conferencing/conference.js">
+    </script>
+    <script>
+        // 可使用 browser-sync start --https --server --files \"./*\" \r 开启 https 服务器  \r web 与 手机需要访问同一IP，pc上不能使用 localhost，否则找不到相同房间  \r 原生 chrome 浏览器中使用必须在PC上有摄像头与话筒(笔记本)， 台式机没有话筒会直接报错\r 在QQ浏览器或360里使用极速模式没有话筒也可以
+        var config = {
+            openSocket: function(config) {
+                // 握手服务器
+                var SIGNALING_SERVER = 'https://webrtcweb.com:9559/',
+                    // 从网址去掉 \/:#%.[] 变成 channel 
+                    defaultChannel = location.href.replace(/\/|:|#|%|\.|\[|\]/g, '');
+
+                var channel = config.channel || defaultChannel;
+                var sender = Math.round(Math.random() * 999999999) + 999999999;
+
+                // 在 socket io 服务器root频道注册新的 channel
+                io.connect(SIGNALING_SERVER).emit('new-channel', {
+                    channel: channel,
+                    sender: sender
+                });
+
+                // 连接对应的 channel, 监听 connect 事件， 执行回调 callback
+                var socket = io.connect(SIGNALING_SERVER + channel);
+                socket.channel = channel;
+                socket.on('connect', function() {
+                    if (config.callback) config.callback(socket);
+                });
+
+                // 这里给 socket 自定义一个 发送message 的方法？
+                socket.send = function(message) {
+                    socket.emit('message', {
+                        sender: sender,
+                        data: message
+                    });
+                };
+
+                //  监听 message 事件， 执行回调 onmessage
+                socket.on('message', config.onmessage);
+            },
+
+            // 当远端有视频流时，向 video 容器中插入新的直播视频
+            onRemoteStream: function(media) {
+                var video = media.video;
+                video.setAttribute('controls', true);
+                video.setAttribute('id', media.stream.id);
+                videosContainer.insertBefore(video, videosContainer.firstChild);
+                video.play();
+            },
+
+            // 当远端视频退出时，删除相应的直播视频
+            onRemoteStreamEnded: function(stream) {
+                var video = document.getElementById(stream.id);
+                if (video) video.parentNode.removeChild(video);
+            },
+
+            // 当发现有限其他 room 存在时，插入 加入房间的按钮 
+            // 
+            onRoomFound: function(room) {
+                var alreadyExist = document.querySelector('button[data-broadcaster="' + room.broadcaster + '"]');
+                if (alreadyExist) return;
+
+                var tr = document.createElement('tr');
+                tr.innerHTML = '<td><strong>' + room.roomName + '</strong> shared a conferencing room with you!</td>' +
+                    '<td><button class="join">Join</button></td>';
+                roomsList.insertBefore(tr, roomsList.firstChild);
+
+                var joinRoomButton = tr.querySelector('.join');
+                joinRoomButton.setAttribute('data-broadcaster', room.broadcaster);
+                joinRoomButton.setAttribute('data-roomToken', room.broadcaster);
+
+                // 点击加入房间的按钮时，调用 本机的 captureUserMedia
+                joinRoomButton.onclick = function() {
+                    this.disabled = true;
+
+                    var broadcaster = this.getAttribute('data-broadcaster');
+                    var roomToken = this.getAttribute('data-roomToken');
+                    captureUserMedia(function() {
+                        conferenceUI.joinRoom({
+                            roomToken: roomToken,
+                            joinUser: broadcaster
+                        });
+                    });
+                };
+            }
+        };
+
+        // where is conference ?
+        var conferenceUI = conference(config);
+        var videosContainer = document.getElementById('videos-container') || document.body;
+        var roomsList = document.getElementById('rooms-list');
+
+        document.getElementById('setup-new-room').onclick = function() {
+            this.disabled = true;
+            captureUserMedia(function() {
+                conferenceUI.createRoom({
+                    roomName: 'Anonymous'
+                });
+            });
+        };
+
+        function captureUserMedia(callback) {
+            var video = document.createElement('video');
+            video.setAttribute('autoplay', true);
+            video.setAttribute('controls', true);
+            videosContainer.insertBefore(video, videosContainer.firstChild);
+
+            // getUserMedia 在哪里？
+            getUserMedia({
+                video: video,
+                onsuccess: function(stream) {
+                    config.attachStream = stream;
+                    video.setAttribute('muted', true);
+                    callback();
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

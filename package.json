@@ -1,0 +1,15 @@
+{
+    "name": "webrtc-test",
+    "version": "1.0.0",
+    "description": "test rtc video conference",
+    "main": "RTCPeerConnection-v1.5.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "serve": "http-server -C cert.pem -K key.pem -S"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "http-server": "^0.10.0"
+    }
+}
