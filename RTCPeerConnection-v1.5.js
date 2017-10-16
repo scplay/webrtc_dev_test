@@ -4,14 +4,17 @@
 // MIT License   - www.WebRTC-Experiment.com/licence
 // Documentation - github.com/muaz-khan/WebRTC-Experiment/tree/master/RTCPeerConnection
 
-window.moz = !!navigator.mozGetUserMedia;
-var chromeVersion = !!navigator.mozGetUserMedia ? 0 : parseInt(navigator.userAgent.match(/Chrom(e|ium)\/([0-9]+)\./)[2]);
+window.moz = !! navigator.mozGetUserMedia;
+var chromeVersion = !! navigator.mozGetUserMedia 
+    ? 0 
+    : (navigator.userAgent.match(/Chrom(e|ium)\/([0-9]+)\./) 
+        && parseInt(navigator.userAgent.match(/Chrom(e|ium)\/([0-9]+)\./)[2]));
 
 function RTCPeerConnection(options) {
     var w = window,
-        PeerConnection = w.mozRTCPeerConnection || w.webkitRTCPeerConnection,
-        SessionDescription = w.mozRTCSessionDescription || w.RTCSessionDescription,
-        IceCandidate = w.mozRTCIceCandidate || w.RTCIceCandidate;
+        PeerConnection = w.RTCPeerConnection || w.mozRTCPeerConnection || w.webkitRTCPeerConnection,
+        SessionDescription = w.RTCSessionDescription || w.mozRTCSessionDescription || w.RTCSessionDescription,
+        IceCandidate = w.RTCIceCandidate || w.mozRTCIceCandidate || w.RTCIceCandidate;
 
     var iceServers = [];
 
@@ -280,7 +283,7 @@ var video_constraints = {
 function getUserMedia(options) {
     var n = navigator,
         media;
-    n.getMedia = n.webkitGetUserMedia || n.mozGetUserMedia;
+    n.getMedia = n.getUserMedia || n.webkitGetUserMedia || n.mozGetUserMedia;
     n.getMedia(options.constraints || {
         video: video_constraints
     }, streaming, options.onerror || function(e) {
@@ -289,8 +292,17 @@ function getUserMedia(options) {
 
     function streaming(stream) {
         var video = options.video;
+
         if (video) {
-            video[moz ? 'mozSrcObject' : 'src'] = moz ? stream : window.webkitURL.createObjectURL(stream);
+            if (moz) {
+                video['mozSrcObject'] = stream 
+            } else if (chromeVersion) { 
+                var URL = window.URL || window.webkitURL;
+                video['src'] = URL.createObjectURL(stream); 
+            } else { // safari 
+                video['srcObject'] = stream; 
+            }
+            
             video.play();
         }
         options.onsuccess && options.onsuccess(stream);

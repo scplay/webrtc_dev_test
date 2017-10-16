@@ -7,3 +7,7 @@ web 与 手机需要访问同一IP，pc上不能使用 localhost，否则找不�
 在QQ浏览器或360里使用极速模式没有话筒也可以
 
 android 手机webview要关闭ssl证书错误的验证才能本地开发
+
+- 2017/10/16 
+	- 可以在 ios 与 mac 上调用视频了 by zeon
+	- 可以参考下 appr.tc, 关于 RTCPeerConnection 握手还需要继续看文档
