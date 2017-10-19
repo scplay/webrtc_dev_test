@@ -18,7 +18,6 @@ function sendFile() {
     // Create the remote connection and its event listeners
 
     file_callee_peer = new RTCPeerConnection();
-    ``
     file_callee_peer.ondatachannel = receiveChannelCallback;
 
     // Set up the ICE candidates for the two peers
