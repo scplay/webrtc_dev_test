@@ -4,18 +4,38 @@
  * ice servers config STUN / TURN ...
  */
 var peer_conf = {
-	iceServers: [
-		// stun server can query IP + port
-		{ url: "stun:stun.l.google.com:19302" }
-	]
+    // iceServers: [
+    //     // stun server can query IP + port
+    //     { url: "stun:stun.l.google.com:19302" }
+
+    // ]
+    iceServers: [
+        // stun server can query IP + port
+        // { url: "stun:stun.l.google.com:19302" },
+        {
+            urls: 'turn:198.181.58.143:4378',
+            // urls: 'turn:180.76.247.189:3478',
+            credential: 'test',
+            username: 'test'
+        }
+    ]
 };
 
-peer_conf = null;
+// peer_conf = null;
 
 /**
  * caller peer connection
  */
 var caller_peer_connect = new RTCPeerConnection(peer_conf);
+
+var channel = caller_peer_connect.createDataChannel("chat");
+channel.onopen = function(event) {
+    debugger
+    channel.send('Hi you!');
+}
+channel.onmessage = function(event) {
+    console.log(event.data);
+}
 
 /**
  * peer connect listeners 
@@ -34,26 +54,26 @@ caller_peer_connect.onnegotiationneeded = callerMultiHandler;
  * the order of add and addStream is serious ?
  */
 function callerAddStream(stream) {
-	caller_peer_connect.addStream(stream);
+    caller_peer_connect.addStream(stream);
 
-	createOffer();
+    createOffer();
 }
 /**
  * create new Offer if find some callee can chat
  */
-function createOffer(){
-	caller_peer_connect
-		.createOffer()
-		.then(setLocalDesciption)
-		.then(sendOfferToCallee)
-		.catch(errorLog);
+function createOffer() {
+    caller_peer_connect
+        .createOffer()
+        .then(setLocalDesciption)
+        .then(sendOfferToCallee)
+        .catch(errorLog);
 }
 
 /**
  * after creat offer caller should set local descrition 
  */
-function setLocalDesciption(session_description) {	
-	caller_peer_connect.setLocalDescription(session_description);
+function setLocalDesciption(session_description) {
+    caller_peer_connect.setLocalDescription(session_description);
 }
 
 /**
@@ -62,47 +82,50 @@ function setLocalDesciption(session_description) {
  * offer to callee through server
  */
 function sendOfferToCallee() {
-	var caller_offer = {
-      name: 'caller',
-      target: 'callee',
-      type: "video-offer",
-      sdp: caller_peer_connect.localDescription
-    };
-    // TODO send to server
-    reciveCallerOffer(caller_peer_connect.localDescription);
+
+    sendToServer({
+        type: 'offer',
+        offer: caller_peer_connect.localDescription
+    });
+    // console.log('reciveCallerOffer();');
+    // console.log(JSON.stringify(caller_peer_connect.localDescription));
+    // reciveCallerOffer(caller_peer_connect.localDescription);
 }
 
 function reciveCalleeAnswer(session_description) {
-	caller_peer_connect.setRemoteDescription(session_description);
+    caller_peer_connect.setRemoteDescription(new RTCSessionDescription(session_description));
 }
 
 // TODO send through server
 function sendCandidateToCallee(candidate) {
+    sendToServer({
+        type: 'candidate-to-callee',
+        candidate: candidate
+    });
 
-	// to server 
-	setTimeout(function(){
-		reciveCallerCandidate(candidate);
-	}, 1000);
+    // to server 
+    // reciveCallerCandidate(candidate);
 }
 
-function reciveCalleeCandidate(candidate){
-	caller_peer_connect.addIceCandidate(new RTCIceCandidate(candidate));
+function reciveCalleeCandidate(candidate) {
+    caller_peer_connect.addIceCandidate(new RTCIceCandidate(candidate));
 }
 
 // TODO why must add ice candidate can stream alive 
 function callerOnIceCandidateHandler(evt) {
-	// debugger;
-	console.log(":Caller: %s", evt.type);
+    // debugger;
+    // console.log(":Caller: %s", evt.type);
 
-	// why candidate would be empty sometime??
-	if (evt.candidate) sendCandidateToCallee(evt.candidate);
+    // why candidate would be empty sometime??
+    if (evt.candidate) sendCandidateToCallee(evt.candidate);
 }
 
 function callerMultiHandler(evt) {
-	console.log(":Caller: %s", evt.type);
-	// debugger;
+    // console.log(":Caller: %s", evt.type);
+
+    // debugger;
 }
 
 function errorLog(e) {
-	console.dir(e);
+    console.dir(e);
 }

@@ -1,22 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-	<meta charset="UTF-8">
-	<title>Zeon's RTC study test page</title>
-	<meta link="https://www.w3.org/TR/webrtc/#simple-peer-to-peer-example" content="w3c-doc"/>
+    <meta charset="UTF-8">
+    <title>Zeon's RTC study test page</title>
+    <meta link="https://www.w3.org/TR/webrtc/#simple-peer-to-peer-example" content="w3c-doc" />
 </head>
+
 <body>
-	<h2>web rtc test</h2>
+    <h2>web rtc test</h2>
 
-	<video id="caller_play" ></video>
+    <video id="caller_play"></video>
 
-	<video id="callee_play" ></video>
+    <video id="callee_play"></video>
 
-	<button onclick="capture()">capture me</button>
+    <br> <br>
 
-	<script src='camera.js'></script>
-	<script src='caller.js'></script>
-	<script src='callee.js'></script>
-	<!-- <script src='video_pipe.js'></script> -->
+    <button onclick="capture()">capture me</button>
+
+    <br> <br>
+
+    <button onclick="sendFile()">send file</button>
+
+    <br> <br>
+
+    <label for="my_socket_id">我的socketId</label>
+    <input type="text" id='my_socket_id' placeholder="">
+
+    <br> <br>
+
+    <label for="my_socket_id">对方socketId</label>
+    <input type="text" id='to_socket_id' placeholder="对方socketId">
+
+    <script src='camera.js'></script>
+    <script src='caller.js'></script>
+    <script src='callee.js'></script>
+    <script src='socket_handler.js'></script>
+
+    <script src='file_pipe.js'></script>
+    <!-- <script src='video_pipe.js'></script> -->
 </body>
+
 </html>
