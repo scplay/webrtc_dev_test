@@ -76,15 +76,6 @@ function reciveCalleeAnswer(session_description) {
 	caller_peer_connect.setRemoteDescription(session_description);
 }
 
-// TODO why must add ice candidate can stream alive 
-function callerOnIceCandidateHandler(evt) {
-	debugger;
-
-	// why candidate would be empty sometime??
-	if (evt.candidate) sendCandidateToCallee(evt.candidate);
-    
-}
-
 // TODO send through server
 function sendCandidateToCallee(candidate) {
 
@@ -98,7 +89,17 @@ function reciveCalleeCandidate(candidate){
 	caller_peer_connect.addIceCandidate(new RTCIceCandidate(candidate));
 }
 
+// TODO why must add ice candidate can stream alive 
+function callerOnIceCandidateHandler(evt) {
+	// debugger;
+	console.log(":Caller: %s", evt.type);
+
+	// why candidate would be empty sometime??
+	if (evt.candidate) sendCandidateToCallee(evt.candidate);
+}
+
 function callerMultiHandler(evt) {
+	console.log(":Caller: %s", evt.type);
 	// debugger;
 }
 

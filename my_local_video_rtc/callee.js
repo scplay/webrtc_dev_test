@@ -53,22 +53,6 @@ function sendAnswerToCaller(){
     reciveCalleeAnswer(callee_peer_connect.localDescription);
 }
 
-// why must add ice candidate can stream alive
-/**
- * @link https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/addIceCandidate
- * 
- * peer 之间除了要交换SDP（session description），还要交换关于网络连接的信息
- * 
- * 用来传递候选 peer 的状态，当 evt.candidate 为 null 时，刚表示所有候选 peer 已传递完毕 ？
- */
-function calleeOnIceCandidateHandler(evt) {
-	debugger;
-
-	/** @var RTCIceCandidate evt.candidate */
-
-	if (evt.candidate) sendCandidateToCaller(evt.candidate);
-    
-}
 
 // TODO use ICE server
 function sendCandidateToCaller(candidate) {
@@ -80,11 +64,31 @@ function sendCandidateToCaller(candidate) {
 }
 
 function reciveCallerCandidate(candidate){
+
 	callee_peer_connect.addIceCandidate(new RTCIceCandidate(candidate));
+}
+
+
+// why must add ice candidate can stream alive
+/**
+ * @link https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/addIceCandidate
+ * 
+ * peer 之间除了要交换SDP（session description），还要交换关于网络连接的信息
+ * 
+ * 用来传递候选 peer 的状态，当 evt.candidate 为 null 时，刚表示所有候选 peer 已传递完毕 ？
+ */
+function calleeOnIceCandidateHandler(evt) {
+	// debugger;
+	console.log("%s :Callee:", evt.type);
+	/** @var RTCIceCandidate evt.candidate */
+
+	if (evt.candidate) sendCandidateToCaller(evt.candidate);
+    
 }
 
 function calleeOnAddStreamHandler(evt) {
 	// debugger;
+	console.log("%s :Callee:", evt.type);
 
 	var callee_video_elem = document.getElementById('callee_play');
 	callee_video_elem.srcObject = evt.stream;
@@ -92,6 +96,7 @@ function calleeOnAddStreamHandler(evt) {
 }
 
 function calleeMultiHandler(evt){
+	console.log("%s :Callee:", evt.type);
 	// debugger;
 }
 
