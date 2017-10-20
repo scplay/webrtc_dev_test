@@ -2,7 +2,7 @@
  * 前端signal信号交换处理 
  */
 
-var server_url = "wss://192.168.1.161:6503";
+var server_url = "wss://" + location.hostname +":6503";
 
 var web_socket = new WebSocket(server_url, "json");
 

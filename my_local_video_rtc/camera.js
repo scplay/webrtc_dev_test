@@ -11,6 +11,12 @@ var media_conf = {
     }
 }
 
+var is_ios = navigator.userAgent.indexOf('iPhone') > 1;
+if (is_ios) media_conf.video = {
+    facingMode: 'user'
+};
+
+
 /**
  * click capture btn 
  */
@@ -27,7 +33,7 @@ function capture() {
 function initCallerVideo(media_stream) {
     var video_elem = document.getElementById('caller_play');
     video_elem.srcObject = media_stream;
-    video_elem.play();
+    if (! is_ios) video_elem.play();
 
     setLocalMediaStream(media_stream);
 

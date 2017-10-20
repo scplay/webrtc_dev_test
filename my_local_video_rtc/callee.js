@@ -24,7 +24,9 @@ callee_peer_connect.ondatachannel = function(event) {
  * peer connect listeners 
  */
 callee_peer_connect.onicecandidate = calleeOnIceCandidateHandler;
-callee_peer_connect.onaddstream = calleeOnAddStreamHandler;
+// @deprecated use ontrack
+// callee_peer_connect.onaddstream = calleeOnAddStreamHandler;
+callee_peer_connect.ontrack = calleeOnAddTrackHandler;
 callee_peer_connect.ondatachannel = calleeMultiHandler;
 callee_peer_connect.oniceconnectionstatechange = calleeMultiHandler;
 callee_peer_connect.onicegatheringstatechange = calleeMultiHandler;
@@ -36,11 +38,10 @@ callee_peer_connect.onnegotiationneeded = calleeMultiHandler;
  * after creat offee caller should set local descrition 
  */
 function reciveCallerOffer(session_description) {
-    callee_peer_connect.setRemoteDescription(new RTCSessionDescription(session_description));
 
+    callee_peer_connect.setRemoteDescription(new RTCSessionDescription(session_description))
+    	.then(createAnswer);
     // debugger;
-
-    createAnswer();
 }
 
 function createAnswer() {
@@ -52,10 +53,13 @@ function createAnswer() {
 }
 
 function calleeSetLocalSessionDescription(session_description) {
-    callee_peer_connect.setLocalDescription(session_description);
+	debugger;
+    return callee_peer_connect.setLocalDescription(session_description);
 }
 
 function sendAnswerToCaller() {
+	debugger;
+
     sendToServer({
         type: 'answer',
         answer: callee_peer_connect.localDescription
@@ -108,11 +112,20 @@ function calleeOnIceCandidateHandler(evt) {
 }
 
 function calleeOnAddStreamHandler(evt) {
-    // debugger;
+    debugger;
     // console.log("%s :Callee:", evt.type);
 
     var callee_video_elem = document.getElementById('callee_play');
-    callee_video_elem.srcObject = evt.stream;
+    callee_video_elem.srcObject = evt.streams;
+    callee_video_elem.play();
+}
+
+function calleeOnAddTrackHandler(evt) {
+    debugger;
+    // console.log("%s :Callee:", evt.type);
+
+    var callee_video_elem = document.getElementById('callee_play');
+    callee_video_elem.srcObject = evt.streams[0];
     callee_video_elem.play();
 }
 

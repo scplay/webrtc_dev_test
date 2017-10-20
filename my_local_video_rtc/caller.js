@@ -30,7 +30,6 @@ var caller_peer_connect = new RTCPeerConnection(peer_conf);
 
 var channel = caller_peer_connect.createDataChannel("chat");
 channel.onopen = function(event) {
-    debugger
     channel.send('Hi you!');
 }
 channel.onmessage = function(event) {
@@ -82,7 +81,6 @@ function setLocalDesciption(session_description) {
  * offer to callee through server
  */
 function sendOfferToCallee() {
-
     sendToServer({
         type: 'offer',
         offer: caller_peer_connect.localDescription
